@@ -1,10 +1,28 @@
 import { runDatabaseOperation } from './database';
-import { toStudyDay } from './reviewSchedule';
+import {
+  calculateReviewSchedule,
+  toStudyDay,
+} from './reviewSchedule';
 
 function normalizeName(name) {
   const normalized = name.trim();
   if (!normalized) throw new Error('A name is required.');
   return normalized;
+}
+
+async function refreshSchedule(db, topicId) {
+  const sessions = await db.getAllAsync(
+    'SELECT completedAt, studyDay FROM sessions WHERE topicId = ?',
+    topicId,
+  );
+  const schedule = calculateReviewSchedule(sessions);
+  await db.runAsync(
+    'UPDATE topics SET nextReviewDay = ?, completedAt = ?, reviewsCompleted = ? WHERE id = ?',
+    schedule.nextReviewDay,
+    schedule.completedAt,
+    schedule.reviewsCompleted,
+    topicId,
+  );
 }
 
 export const studyRepository = {
@@ -82,6 +100,32 @@ export const studyRepository = {
         'SELECT * FROM sessions WHERE topicId = ? ORDER BY studyDay DESC, completedAt DESC, id DESC',
         topicId,
       ),
+    );
+  },
+
+  async recordSession(topicId, completion = new Date()) {
+    const studyDay = toStudyDay(completion);
+    const completedAt = completion.getTime();
+
+    await runDatabaseOperation((db) =>
+      db.withTransactionAsync(async () => {
+        const topic = await db.getFirstAsync(
+          `SELECT subjects.archivedAt FROM topics
+           JOIN subjects ON subjects.id = topics.subjectId WHERE topics.id = ?`,
+          topicId,
+        );
+        if (!topic) throw new Error('Topic not found.');
+        if (topic.archivedAt !== null) throw new Error('Restore the subject before logging a session.');
+
+        const inserted = await db.runAsync(
+          `INSERT INTO sessions (topicId, completedAt, studyDay) VALUES (?, ?, ?)
+           ON CONFLICT (topicId, completedAt) DO NOTHING`,
+          topicId,
+          completedAt,
+          studyDay,
+        );
+        if (inserted.changes) await refreshSchedule(db, topicId);
+      }),
     );
   },
 };
