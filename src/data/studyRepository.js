@@ -1,4 +1,6 @@
 import { runDatabaseOperation } from './database';
+import { toStudyDay } from './reviewSchedule';
+
 function normalizeName(name) {
   const normalized = name.trim();
   if (!normalized) throw new Error('A name is required.');
@@ -60,5 +62,26 @@ export const studyRepository = {
       const result = await db.runAsync('UPDATE topics SET name = ? WHERE id = ?', normalized, topicId);
       if (!result.changes) throw new Error('Topic not found.');
     });
+  },
+
+  listDueTopics(today = toStudyDay(new Date())) {
+    return runDatabaseOperation((db) =>
+      db.getAllAsync(
+        `SELECT topics.* FROM topics
+         JOIN subjects ON subjects.id = topics.subjectId
+         WHERE subjects.archivedAt IS NULL AND topics.nextReviewDay <= ?
+         ORDER BY topics.nextReviewDay, topics.id`,
+        today,
+      ),
+    );
+  },
+
+  listSessions(topicId) {
+    return runDatabaseOperation((db) =>
+      db.getAllAsync(
+        'SELECT * FROM sessions WHERE topicId = ? ORDER BY studyDay DESC, completedAt DESC, id DESC',
+        topicId,
+      ),
+    );
   },
 };
