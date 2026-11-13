@@ -1,5 +1,4 @@
 import { runDatabaseOperation } from './database';
-
 function normalizeName(name) {
   const normalized = name.trim();
   if (!normalized) throw new Error('A name is required.');
@@ -38,6 +37,28 @@ export const studyRepository = {
         subjectId,
       );
       if (!result.changes) throw new Error('Subject not found.');
+    });
+  },
+
+  listTopics(subjectId) {
+    return runDatabaseOperation((db) =>
+      db.getAllAsync('SELECT * FROM topics WHERE subjectId = ? ORDER BY name COLLATE NOCASE, id', subjectId),
+    );
+  },
+
+  async createTopic(subjectId, name) {
+    const normalized = normalizeName(name);
+    return runDatabaseOperation(async (db) => {
+      const result = await db.runAsync('INSERT INTO topics (subjectId, name) VALUES (?, ?)', subjectId, normalized);
+      return result.lastInsertRowId;
+    });
+  },
+
+  async renameTopic(topicId, name) {
+    const normalized = normalizeName(name);
+    await runDatabaseOperation(async (db) => {
+      const result = await db.runAsync('UPDATE topics SET name = ? WHERE id = ?', normalized, topicId);
+      if (!result.changes) throw new Error('Topic not found.');
     });
   },
 };
