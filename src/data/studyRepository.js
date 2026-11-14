@@ -66,6 +66,12 @@ export const studyRepository = {
     );
   },
 
+  listAllTopics() {
+    return runDatabaseOperation((db) =>
+      db.getAllAsync('SELECT * FROM topics ORDER BY name COLLATE NOCASE, id'),
+    );
+  },
+
   async createTopic(subjectId, name) {
     const normalized = normalizeName(name);
     return runDatabaseOperation(async (db) => {
