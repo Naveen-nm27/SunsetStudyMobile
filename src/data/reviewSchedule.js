@@ -1,4 +1,4 @@
-const reviewGaps = [1, 3, 7, 14, 30, 60];
+export const reviewGaps = [1, 3, 7, 14, 30, 60];
 
 export function toStudyDay(date) {
   if (!Number.isFinite(date.getTime())) {
@@ -17,7 +17,19 @@ function addDays(studyDay, days) {
   return date.toISOString().slice(0, 10);
 }
 
-export function calculateReviewSchedule(sessions) {
+export function projectReviews({ nextReviewDay, reviewsCompleted }) {
+  const reviews = [];
+  if (!nextReviewDay) return reviews;
+
+  let day = nextReviewDay;
+  for (let index = reviewsCompleted; index < reviewGaps.length; index += 1) {
+    if (index > reviewsCompleted) day = addDays(day, reviewGaps[index]);
+    reviews.push({ day, number: index + 1, final: index === reviewGaps.length - 1 });
+  }
+  return reviews;
+}
+
+export function calculateReviewSchedule(sessions, onSession) {
   const ordered = [...sessions].sort(
     (a, b) => a.studyDay.localeCompare(b.studyDay) || a.completedAt - b.completedAt,
   );
@@ -29,17 +41,27 @@ export function calculateReviewSchedule(sessions) {
 
   let reviewsCompleted = 0;
   let nextReviewDay = addDays(initial.studyDay, reviewGaps[0]);
+  let completedAt = null;
+  onSession?.(initial, 'Initial study');
 
   for (const session of ordered.slice(1)) {
-    if (session.studyDay < nextReviewDay) continue;
+    if (!nextReviewDay || session.studyDay < nextReviewDay) {
+      onSession?.(session, 'Practice');
+      continue;
+    }
 
     reviewsCompleted += 1;
     if (reviewsCompleted === reviewGaps.length) {
-      return { nextReviewDay: null, completedAt: session.completedAt, reviewsCompleted };
+      onSession?.(session, 'Final review');
+      completedAt = session.completedAt;
+      nextReviewDay = null;
+      if (!onSession) break;
+      continue;
     }
+    onSession?.(session, `Review ${reviewsCompleted}`);
 
     nextReviewDay = addDays(session.studyDay, reviewGaps[reviewsCompleted]);
   }
 
-  return { nextReviewDay, completedAt: null, reviewsCompleted };
+  return { nextReviewDay, completedAt, reviewsCompleted };
 }
