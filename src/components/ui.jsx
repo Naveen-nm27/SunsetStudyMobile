@@ -1,5 +1,6 @@
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { demoStudyEnabled } from '../data/demoStudy';
 import { useStudy } from '../study/StudyProvider';
 
 export const colors = {
@@ -31,7 +32,7 @@ export function Icon({ name, color = colors.ink, size = 21 }) {
 export function Brand() {
   return <View style={styles.brand}>
     <View style={styles.brandMark}><Icon name="sun" color={colors.night} size={23} /></View>
-    <View><Text style={styles.brandTitle}>Sunset Study</Text><Text style={styles.brandCaption}>LOCAL WORKSPACE</Text></View>
+    <View><Text style={styles.brandTitle}>Sunset Study</Text><Text style={styles.brandCaption}>{demoStudyEnabled ? 'DEMO WORKSPACE' : 'LOCAL WORKSPACE'}</Text></View>
   </View>;
 }
 
