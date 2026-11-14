@@ -36,8 +36,8 @@ export function Brand() {
   </View>;
 }
 
-export function Page({ children }) {
-  return <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+export function Page({ children, scrollRef }) {
+  return <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
     <View style={styles.page}>{children}</View>
   </ScrollView>;
 }
