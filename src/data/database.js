@@ -2,7 +2,7 @@ import { openDatabaseAsync } from 'expo-sqlite';
 import { demoStudyEnabled, seedDemoStudy } from './demoStudy';
 
 const databaseName = demoStudyEnabled ? 'local-study-demo.db' : 'local-study.db';
-const schemaVersion = 1;
+const schemaVersion = 2;
 
 const initialSchema = `
   CREATE TABLE subjects (
@@ -42,11 +42,16 @@ async function initializeDatabase() {
   try {
     await db.execAsync('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
     await db.withTransactionAsync(async () => {
-      const version = await db.getFirstAsync('PRAGMA user_version');
-      if (version?.user_version === 0) {
-        await db.execAsync(initialSchema);
-      } else if (version?.user_version !== schemaVersion) {
-        throw new Error(`Unsupported study database version: ${version?.user_version}.`);
+      const version = (await db.getFirstAsync('PRAGMA user_version'))?.user_version;
+      if (version === undefined || version > schemaVersion) {
+        throw new Error(`Unsupported study database version: ${version}.`);
+      }
+      if (version === 0) await db.execAsync(initialSchema);
+      if (version < 2) {
+        await db.execAsync(`
+          CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+          PRAGMA user_version = 2;
+        `);
       }
     });
     if (demoStudyEnabled) await seedDemoStudy(db);
