@@ -2,7 +2,7 @@ import { openDatabaseAsync } from 'expo-sqlite';
 import { demoStudyEnabled, seedDemoStudy } from './demoStudy';
 
 const databaseName = demoStudyEnabled ? 'local-study-demo.db' : 'local-study.db';
-const schemaVersion = 2;
+const schemaVersion = 3;
 
 const initialSchema = `
   CREATE TABLE subjects (
@@ -51,6 +51,12 @@ async function initializeDatabase() {
         await db.execAsync(`
           CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
           PRAGMA user_version = 2;
+        `);
+      }
+      if (version < 3) {
+        await db.execAsync(`
+          ALTER TABLE subjects ADD COLUMN color TEXT;
+          PRAGMA user_version = 3;
         `);
       }
     });

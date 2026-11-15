@@ -1,4 +1,5 @@
 import { runDatabaseOperation } from './database';
+import { normalizeSubjectColor } from './subjectColor';
 import {
   calculateReviewSchedule,
   toStudyDay,
@@ -8,6 +9,13 @@ function normalizeName(name) {
   const normalized = name.trim();
   if (!normalized) throw new Error('A name is required.');
   return normalized;
+}
+
+function validateSubjectColor(value) {
+  if (value === null) return null;
+  const color = normalizeSubjectColor(value);
+  if (!color) throw new Error('Enter a valid hex color.');
+  return color;
 }
 
 async function refreshSchedule(db, topicId) {
@@ -32,10 +40,11 @@ export const studyRepository = {
     );
   },
 
-  async createSubject(name) {
+  async createSubject(name, color = null) {
     const normalized = normalizeName(name);
+    const validatedColor = validateSubjectColor(color);
     return runDatabaseOperation(async (db) => {
-      const result = await db.runAsync('INSERT INTO subjects (name) VALUES (?)', normalized);
+      const result = await db.runAsync('INSERT INTO subjects (name, color) VALUES (?, ?)', normalized, validatedColor);
       return result.lastInsertRowId;
     });
   },
@@ -44,6 +53,15 @@ export const studyRepository = {
     const normalized = normalizeName(name);
     await runDatabaseOperation(async (db) => {
       const result = await db.runAsync('UPDATE subjects SET name = ? WHERE id = ?', normalized, subjectId);
+      if (!result.changes) throw new Error('Subject not found.');
+    });
+  },
+
+  async updateSubject(subjectId, name, color) {
+    const normalized = normalizeName(name);
+    const validatedColor = validateSubjectColor(color);
+    await runDatabaseOperation(async (db) => {
+      const result = await db.runAsync('UPDATE subjects SET name = ?, color = ? WHERE id = ?', normalized, validatedColor, subjectId);
       if (!result.changes) throw new Error('Subject not found.');
     });
   },
