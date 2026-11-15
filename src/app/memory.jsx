@@ -4,11 +4,13 @@ import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { ForgettingCurve } from '../components/ForgettingCurve';
 import { Dialog, StudyDialog } from '../components/StudyDialog';
+import { SubjectGradient } from '../components/SubjectGradient';
 import { Badge, Button, Card, Empty, Icon, Page, PageHeading, SectionTitle, StudyContent } from '../components/ui';
 import { projectReviews, reviewGaps } from '../data/reviewSchedule';
 import { studyRepository } from '../data/studyRepository';
 import { formatDay, plural, reviewCount, sessionTime, topicStatus } from '../study/format';
 import { useStudy, useTopicSessions } from '../study/StudyProvider';
+import { defaultSubjectColor } from '../study/subjectPalette';
 
 const dayMs = 86_400_000;
 
@@ -71,7 +73,7 @@ export default function MemoryScreen() {
     <StudyContent>
       {!topic ? <Card><Empty icon="curve" title="Choose a topic to study" detail="Add a topic to your library to start building its review history."
         action={<Button label="Open library" icon="arrow" onPress={() => router.push('/library')} />} /></Card> : <>
-        <Card>
+        <Card background={subject && <SubjectGradient color={subject.color ?? defaultSubjectColor(subject.id)} />}>
           <View style={styles.summary}>
             <View style={styles.summaryCopy}>
               <Text style={styles.subject}>{subject?.name}{archived ? ' · Archived' : ''}</Text>

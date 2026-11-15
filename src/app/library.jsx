@@ -3,12 +3,12 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { StudyDialog } from '../components/StudyDialog';
+import { SubjectGradient } from '../components/SubjectGradient';
 import { Badge, Button, Card, Empty, Icon, Page, PageHeading, SectionTitle, StudyContent } from '../components/ui';
 import { studyRepository } from '../data/studyRepository';
 import { plural, topicStatus } from '../study/format';
 import { useStudy } from '../study/StudyProvider';
-
-const subjectColors = ['#7e235d', '#ad4c26', '#6350a3', '#46705f', '#a63158'];
+import { defaultSubjectColor } from '../study/subjectPalette';
 
 export default function LibraryScreen() {
   const styles = useStyles();
@@ -41,11 +41,11 @@ export default function LibraryScreen() {
   function subjectCard(subject) {
     const subjectTopics = topics.filter((topic) => topic.subjectId === subject.id);
     const isArchived = subject.archivedAt !== null;
-    const accent = subjectColors[subject.id % subjectColors.length];
+    const accent = subject.color ?? defaultSubjectColor(subject.id);
 
-    return <Card key={subject.id}>
+    return <Card key={subject.id} background={<SubjectGradient color={accent} />}>
       <View style={styles.subjectHeader}>
-        <View style={styles.subjectMark}><Icon name="book" color={accent} /></View>
+        <View style={[styles.subjectMark, { borderColor: accent }]}><Icon name="book" color={colors.ink} /></View>
         <View style={styles.copy}><Text style={styles.subjectTitle}>{subject.name}</Text><Text style={styles.detail}>{plural(subjectTopics.length, 'topic')}</Text></View>
         {!isArchived && <Button label="Add topic" icon="plus" tone="secondary" disabled={busy} onPress={() => editTopic(subject)} />}
       </View>
@@ -79,7 +79,7 @@ export default function LibraryScreen() {
 const useStyles = createThemedStyles((colors) => ({
   section: { gap: 12 },
   subjectHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-  subjectMark: { backgroundColor: colors.softPlum, width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  subjectMark: { backgroundColor: colors.card, borderWidth: 2, width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   copy: { flex: 1, gap: 3 },
   subjectTitle: { fontSize: 20, color: colors.ink, fontWeight: '800' },
   detail: { color: colors.muted, fontSize: 13 },

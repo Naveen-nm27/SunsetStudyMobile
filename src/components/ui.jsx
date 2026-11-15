@@ -58,9 +58,9 @@ export function SectionTitle({ children }) {
   return <Text accessibilityRole="header" style={styles.sectionTitle}>{children}</Text>;
 }
 
-export function Card({ children }) {
+export function Card({ children, background }) {
   const styles = useStyles();
-  return <View style={styles.card}>{children}</View>;
+  return <View style={[styles.card, !!background && { overflow: 'hidden' }]}>{background}{children}</View>;
 }
 
 export function Button({ label, onPress, icon, tone = 'primary', disabled = false }) {
