@@ -1,9 +1,12 @@
+import { createThemedStyles, useColors } from '../study/AppearanceProvider';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Button, colors, Icon, SectionTitle } from './ui';
+import { Button, Icon, SectionTitle } from './ui';
 import { useStudy } from '../study/StudyProvider';
 
 export function StudyDialog({ spec, onClose }) {
+  const styles = useStyles();
+  const colors = useColors();
   const [value, setValue] = useState(spec.field?.initial ?? '');
   const [error, setError] = useState(null);
   const { busy, mutate } = useStudy();
@@ -38,6 +41,7 @@ export function StudyDialog({ spec, onClose }) {
 }
 
 export function Dialog({ title, onClose, children }) {
+  const styles = useStyles();
   return <Modal visible transparent animationType="fade" onRequestClose={onClose}>
     <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Pressable style={StyleSheet.absoluteFill} accessible={false} onPress={onClose} />
@@ -51,7 +55,7 @@ export function Dialog({ title, onClose, children }) {
   </Modal>;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   overlay: { flex: 1, backgroundColor: '#21112e80', justifyContent: 'center', alignItems: 'center', padding: 20 },
   sheet: { width: '100%', maxWidth: 490, maxHeight: '90%', borderRadius: 20, padding: 22, backgroundColor: colors.card, gap: 15 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
@@ -59,5 +63,5 @@ const styles = StyleSheet.create({
   label: { color: colors.ink, fontWeight: '700', fontSize: 13 },
   input: { minHeight: 47, paddingHorizontal: 12, color: colors.ink, borderColor: colors.border, borderWidth: 1, borderRadius: 10, backgroundColor: colors.paper, fontSize: 16 },
   actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
-  error: { color: '#a42642', fontSize: 13 },
-});
+  error: { color: colors.danger, fontSize: 13 },
+}));

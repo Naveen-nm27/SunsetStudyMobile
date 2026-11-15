@@ -1,15 +1,18 @@
+import { createThemedStyles, useColors } from '../study/AppearanceProvider';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { StudyDialog } from '../components/StudyDialog';
-import { Badge, Button, Card, colors, Empty, Icon, Page, PageHeading, SectionTitle, StudyContent } from '../components/ui';
+import { Badge, Button, Card, Empty, Icon, Page, PageHeading, SectionTitle, StudyContent } from '../components/ui';
 import { studyRepository } from '../data/studyRepository';
 import { plural, topicStatus } from '../study/format';
 import { useStudy } from '../study/StudyProvider';
 
-const subjectColors = [colors.plum, '#ad4c26', '#6350a3', '#46705f', '#a63158'];
+const subjectColors = ['#7e235d', '#ad4c26', '#6350a3', '#46705f', '#a63158'];
 
 export default function LibraryScreen() {
+  const styles = useStyles();
+  const colors = useColors();
   const router = useRouter();
   const { subjects, topics, today, busy, loading, loadError } = useStudy();
   const [dialog, setDialog] = useState(null);
@@ -73,7 +76,7 @@ export default function LibraryScreen() {
   </Page>;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   section: { gap: 12 },
   subjectHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   subjectMark: { backgroundColor: colors.softPlum, width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
@@ -85,4 +88,4 @@ const styles = StyleSheet.create({
   topicName: { flex: 1, color: colors.ink, fontSize: 15, fontWeight: '700' },
   editButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   actions: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-});
+}));

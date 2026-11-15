@@ -1,7 +1,8 @@
+import { createThemedStyles, useColors } from '../study/AppearanceProvider';
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Pressable, Text, View, useWindowDimensions } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
-import { Badge, Button, Card, colors, decorativeSvg, Empty, Icon, Page, SectionTitle, StudyContent } from '../components/ui';
+import { Badge, Button, Card, decorativeSvg, Empty, Icon, Page, SectionTitle, StudyContent } from '../components/ui';
 import { formatDay, plural, topicStatus } from '../study/format';
 import { useStudy } from '../study/StudyProvider';
 
@@ -19,6 +20,8 @@ function Sunset() {
 }
 
 export default function TodayScreen() {
+  const styles = useStyles();
+  const colors = useColors();
   const router = useRouter();
   const { subjects, topics, today } = useStudy();
   const { width } = useWindowDimensions();
@@ -34,7 +37,7 @@ export default function TodayScreen() {
   const stats = [
     { value: due.length, label: 'Due reviews', icon: 'clock', color: colors.action },
     { value: activeTopics.length, label: 'Library topics', icon: 'layers', color: colors.purple },
-    { value: activeTopics.filter((topic) => topic.completedAt !== null).length, label: 'Completed', icon: 'check', color: '#315f42' },
+    { value: activeTopics.filter((topic) => topic.completedAt !== null).length, label: 'Completed', icon: 'check', color: colors.success },
   ];
 
   return <Page>
@@ -71,7 +74,7 @@ export default function TodayScreen() {
   </Page>;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   hero: { minHeight: 221, position: 'relative', overflow: 'hidden', borderRadius: 22, backgroundColor: '#301936' },
   art: { position: 'absolute', right: 0, top: 0, bottom: 0, width: '58%' },
   artSmall: { width: '64%', opacity: 0.43 },
@@ -86,4 +89,4 @@ const styles = StyleSheet.create({
   columns: { gap: 16 }, column: { minWidth: 0, gap: 10 },
   topic: { flexDirection: 'row', alignItems: 'center', minHeight: 49, gap: 9 },
   topicCopy: { flex: 1, gap: 4 }, topicName: { color: colors.ink, fontSize: 15, fontWeight: '800' },
-});
+}));

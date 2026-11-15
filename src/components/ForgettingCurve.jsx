@@ -1,9 +1,10 @@
+import { createThemedStyles, useColors } from '../study/AppearanceProvider';
 import { useMemo, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, Text, View } from 'react-native';
 import Svg, { Defs, Line, LinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
 import { calculateReviewSchedule, reviewGaps } from '../data/reviewSchedule';
 import { formatDay, plural, sessionTime } from '../study/format';
-import { Button, Dot, colors, decorativeSvg } from './ui';
+import { Button, Dot, decorativeSvg } from './ui';
 
 const dayMs = 86_400_000;
 const dateLabel = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
@@ -12,10 +13,11 @@ const height = 230;
 const left = 38;
 const top = 23;
 const bottom = 195;
-const reviewColor = '#ae710d';
 const dateOptions = { month: 'short', day: 'numeric', year: 'numeric' };
 
 export function ForgettingCurve({ sessions, today, reviews, selectedReview, onSelectReview, selectedSession, onSelect }) {
+  const styles = useStyles();
+  const colors = useColors();
   const [width, setWidth] = useState(360);
   const [fullSchedule, setFullSchedule] = useState(false);
   const [days, setDays] = useState(null);
@@ -84,7 +86,7 @@ export function ForgettingCurve({ sessions, today, reviews, selectedReview, onSe
       {[0, 25, 50, 75, 100].map((level) => <GridLine key={level} level={level} left={left} right={right} y={graph.y(level)} />)}
       {graph.paths.map(({ id, area }) => <Path key={`area-${id}`} d={area} fill="url(#retention)" />)}
       {graph.markers.map(({ day, time }, index) => <Line key={day} x1={graph.x(time)} x2={graph.x(time)} y1={top} y2={bottom}
-        stroke={reviewColor} opacity={day === selectedReview || index === 0 ? 1 : 0.48} strokeWidth={day === selectedReview ? 3 : 1.5} strokeDasharray="4 4" />)}
+        stroke={colors.review} opacity={day === selectedReview || index === 0 ? 1 : 0.48} strokeWidth={day === selectedReview ? 3 : 1.5} strokeDasharray="4 4" />)}
       {graph.paths.map(({ id, line }) => <Path key={id} d={line} fill="none" stroke={colors.orange} strokeWidth={2.4} />)}
       {active && <Line x1={graph.x(active.completedAt)} x2={graph.x(active.completedAt)} y1={top} y2={bottom} stroke={colors.pink} strokeDasharray="3 4" />}
       {Array.from({ length: tickCount }, (_, index) => {
@@ -131,7 +133,7 @@ export function ForgettingCurve({ sessions, today, reviews, selectedReview, onSe
     </View>
     <View style={styles.legend}>
       <View style={styles.item}><Dot color={colors.pink} /><Text style={styles.label}>Study session</Text></View>
-      {!!graph.markers.length && <View style={styles.item}><Dot color={reviewColor} /><Text style={styles.label}>{showAllReviews ? 'Review dates' : 'Next review'}</Text></View>}
+      {!!graph.markers.length && <View style={styles.item}><Dot color={colors.review} /><Text style={styles.label}>{showAllReviews ? 'Review dates' : 'Next review'}</Text></View>}
     </View>
     <Text accessibilityLiveRegion="polite" style={styles.label}>{graph.visible.length ? `${plural(graph.visible.length, 'session')} in view. Tap or select a dot for details.` : 'No sessions in this date range.'}</Text>
     {range === null && reviews.length > 1 && <Button label={showAllReviews ? 'Show next review' : 'Show all review dates'} tone="secondary"
@@ -140,13 +142,14 @@ export function ForgettingCurve({ sessions, today, reviews, selectedReview, onSe
 }
 
 function GridLine({ level, left, right, y }) {
+  const colors = useColors();
   return <>
     <Line x1={left} x2={right} y1={y} y2={y} stroke={colors.border} strokeWidth={1} />
     <SvgText x={left - 8} y={y + 4} fill={colors.muted} fontSize={10} textAnchor="end">{`${level}%`}</SvgText>
   </>;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   chart: { width: '100%', gap: 8 },
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   filter: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 9, paddingHorizontal: 9, minHeight: 38, justifyContent: 'center' },
@@ -155,12 +158,12 @@ const styles = StyleSheet.create({
   plot: { position: 'relative', height },
   marker: { position: 'absolute', top: 0, height: 44 },
   markerDot: { position: 'absolute', top: top - 5, width: 10, height: 10, borderRadius: 5, backgroundColor: colors.pink, borderColor: colors.card, borderWidth: 1 },
-  markerActive: { transform: [{ scale: 1.4 }], borderColor: colors.night, borderWidth: 2 },
-  reviewDot: { top: 34, backgroundColor: reviewColor },
-  tooltip: { position: 'absolute', top: 44, borderRadius: 10, backgroundColor: colors.night, paddingHorizontal: 11, paddingVertical: 8, gap: 2 },
-  tooltipTitle: { color: '#fff7f0', fontSize: 13, fontWeight: '800' },
-  tooltipDetail: { color: colors.nightMuted, fontSize: 12 },
+  markerActive: { transform: [{ scale: 1.4 }], borderColor: colors.ink, borderWidth: 2 },
+  reviewDot: { top: 34, backgroundColor: colors.review },
+  tooltip: { position: 'absolute', top: 44, borderRadius: 10, backgroundColor: colors.tooltip, paddingHorizontal: 11, paddingVertical: 8, gap: 2 },
+  tooltipTitle: { color: colors.tooltipText, fontSize: 13, fontWeight: '800' },
+  tooltipDetail: { color: colors.tooltipMuted, fontSize: 12 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
   item: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   label: { color: colors.muted, fontSize: 12 },
-});
+}));

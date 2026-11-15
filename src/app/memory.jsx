@@ -1,9 +1,10 @@
+import { createThemedStyles, useColors } from '../study/AppearanceProvider';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { ForgettingCurve } from '../components/ForgettingCurve';
 import { Dialog, StudyDialog } from '../components/StudyDialog';
-import { Badge, Button, Card, colors, Empty, Icon, Page, PageHeading, SectionTitle, StudyContent } from '../components/ui';
+import { Badge, Button, Card, Empty, Icon, Page, PageHeading, SectionTitle, StudyContent } from '../components/ui';
 import { projectReviews, reviewGaps } from '../data/reviewSchedule';
 import { studyRepository } from '../data/studyRepository';
 import { formatDay, plural, reviewCount, sessionTime, topicStatus } from '../study/format';
@@ -12,6 +13,8 @@ import { useStudy, useTopicSessions } from '../study/StudyProvider';
 const dayMs = 86_400_000;
 
 export default function MemoryScreen() {
+  const styles = useStyles();
+  const colors = useColors();
   const router = useRouter();
   const { topic: topicParam } = useLocalSearchParams();
   const { subjects, topics, today, busy } = useStudy();
@@ -161,7 +164,7 @@ export default function MemoryScreen() {
   </Page>;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   summary: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   summaryCopy: { flexGrow: 1, flexShrink: 1, gap: 5 },
   subject: { fontSize: 12, fontWeight: '800', color: colors.plum },
@@ -175,10 +178,10 @@ const styles = StyleSheet.create({
   column: { minWidth: 0 },
   row: { borderTopWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', minHeight: 53, paddingVertical: 8, gap: 8 },
   selected: { backgroundColor: colors.softPlum, borderRadius: 8, paddingHorizontal: 8 },
-  expandedReview: { backgroundColor: '#faedcf', borderRadius: 10, paddingHorizontal: 8 },
+  expandedReview: { backgroundColor: colors.warningSurface, borderRadius: 10, paddingHorizontal: 8 },
   expandedChevron: { transform: [{ rotate: '90deg' }] },
   reviewDetails: { gap: 8, paddingBottom: 10 },
   reviewMark: { width: 27, height: 27, borderRadius: 8, backgroundColor: colors.softPlum, alignItems: 'center', justifyContent: 'center' },
   reviewNumber: { color: colors.purple, fontSize: 12, fontWeight: '800' },
   rowTitle: { color: colors.ink, fontSize: 14, fontWeight: '800' },
-});
+}));

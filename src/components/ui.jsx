@@ -1,18 +1,14 @@
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { createThemedStyles, useColors } from '../study/AppearanceProvider';
+import { ActivityIndicator, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { demoStudyEnabled } from '../data/demoStudy';
 import { useStudy } from '../study/StudyProvider';
-
-export const colors = {
-  paper: '#f4f0eb', card: '#fffcf8', ink: '#291942', muted: '#6a5874', border: '#e6ddd8',
-  purple: '#4f1d6e', night: '#21112e', nightMuted: '#cdbbd4', orange: '#ef5a1b', action: '#a43712',
-  gold: '#f8b51b', pink: '#c72c66', plum: '#7e235d', softPlum: '#efe5f3', softOrange: '#fae7db',
-};
 
 export const decorativeSvg = Platform.OS === 'web' ? { 'aria-hidden': true } : { accessible: false };
 
 const iconPaths = {
   sun: 'M3 18h18M5 14h14M7 14a5 5 0 0 1 10 0M12 3v2M4.5 6.5 6 8m13.5-1.5L18 8',
+  moon: 'M20.8 14.3A9 9 0 0 1 9.7 3.2 9 9 0 1 0 20.8 14.3Z',
   book: 'M3 5c4-1 6 0 9 2 3-2 5-3 9-2v13c-4-1-6 0-9 2-3-2-5-3-9-2zM12 7v13',
   curve: 'M3 4v16h18M6 7c1 6 4 8 8 8V8c1 4 3 6 7 6',
   plus: 'M12 5v14M5 12h14', chevron: 'm9 6 6 6-6 6',
@@ -23,13 +19,16 @@ const iconPaths = {
   archive: 'M4 8h16v12H4zM3 4h18v4H3zM10 12h4',
 };
 
-export function Icon({ name, color = colors.ink, size = 21 }) {
+export function Icon({ name, color, size = 21 }) {
+  const colors = useColors();
   return <Svg width={size} height={size} viewBox="0 0 24 24" {...decorativeSvg}>
-    <Path d={iconPaths[name]} fill="none" stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+    <Path d={iconPaths[name]} fill="none" stroke={color ?? colors.ink} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
   </Svg>;
 }
 
 export function Brand() {
+  const styles = useStyles();
+  const colors = useColors();
   return <View style={styles.brand}>
     <View style={styles.brandMark}><Icon name="sun" color={colors.night} size={23} /></View>
     <View><Text style={styles.brandTitle}>Sunset Study</Text><Text style={styles.brandCaption}>{demoStudyEnabled ? 'DEMO WORKSPACE' : 'LOCAL WORKSPACE'}</Text></View>
@@ -37,12 +36,14 @@ export function Brand() {
 }
 
 export function Page({ children, scrollRef }) {
+  const styles = useStyles();
   return <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
     <View style={styles.page}>{children}</View>
   </ScrollView>;
 }
 
 export function PageHeading({ title, description, action }) {
+  const styles = useStyles();
   return <View style={styles.pageHeading}>
     <View style={styles.headingCopy}>
       <Text accessibilityRole="header" style={styles.title}>{title}</Text>
@@ -53,15 +54,19 @@ export function PageHeading({ title, description, action }) {
 }
 
 export function SectionTitle({ children }) {
+  const styles = useStyles();
   return <Text accessibilityRole="header" style={styles.sectionTitle}>{children}</Text>;
 }
 
 export function Card({ children }) {
+  const styles = useStyles();
   return <View style={styles.card}>{children}</View>;
 }
 
 export function Button({ label, onPress, icon, tone = 'primary', disabled = false }) {
-  const foreground = tone === 'primary' ? '#fffaf3' : tone === 'danger' ? '#a42642' : colors.ink;
+  const styles = useStyles();
+  const colors = useColors();
+  const foreground = tone === 'primary' ? colors.actionText : tone === 'danger' ? colors.danger : tone === 'light' ? '#291942' : colors.ink;
   return <Pressable accessibilityRole="button" accessibilityState={{ disabled }} onPress={onPress} disabled={disabled}
     style={({ pressed }) => [styles.button, styles[tone], (disabled || pressed) && { opacity: disabled ? 0.5 : 0.78 }]}>
     {icon && <Icon name={icon} size={17} color={foreground} />}
@@ -70,13 +75,17 @@ export function Button({ label, onPress, icon, tone = 'primary', disabled = fals
 }
 
 export function Badge({ label, tone }) {
-  const palette = { green: ['#e6efe4', '#315f42'], plum: [colors.softPlum, colors.purple], gold: ['#faedcf', '#74500d'], orange: [colors.softOrange, colors.action] };
+  const styles = useStyles();
+  const colors = useColors();
+  const palette = { green: [colors.successSurface, colors.success], plum: [colors.softPlum, colors.purple], gold: [colors.warningSurface, colors.warning], orange: [colors.softOrange, colors.action] };
   return <View style={[styles.badge, { backgroundColor: palette[tone][0] }]}>
     <Text style={[styles.badgeText, { color: palette[tone][1] }]}>{label}</Text>
   </View>;
 }
 
 export function Empty({ icon, title, detail, action }) {
+  const styles = useStyles();
+  const colors = useColors();
   return <View style={styles.empty}>
     <View style={styles.emptyIcon}><Icon name={icon} color={colors.purple} size={24} /></View>
     <Text style={styles.emptyTitle}>{title}</Text>
@@ -86,6 +95,7 @@ export function Empty({ icon, title, detail, action }) {
 }
 
 export function StudyContent({ children }) {
+  const colors = useColors();
   const { loading, loadError, refresh } = useStudy();
   if (loading) return <ActivityIndicator accessibilityLabel="Loading study data" color={colors.purple} />;
   if (loadError) return <Card><Empty icon="archive" title="Couldn’t load your library" detail={loadError}
@@ -97,7 +107,7 @@ export function Dot({ color }) {
   return <Svg width={10} height={10} viewBox="0 0 10 10" {...decorativeSvg}><Circle cx={5} cy={5} r={4} fill={color} /></Svg>;
 }
 
-export const styles = StyleSheet.create({
+const useStyles = createThemedStyles((colors) => ({
   brand: { flexDirection: 'row', alignItems: 'center', gap: 11 },
   brandMark: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.gold, borderRadius: 12 },
   brandTitle: { color: '#fff7f0', fontSize: 19, fontWeight: '800', letterSpacing: -0.6 },
@@ -115,7 +125,7 @@ export const styles = StyleSheet.create({
   primary: { backgroundColor: colors.action },
   secondary: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
   light: { backgroundColor: '#fff2d8' },
-  danger: { backgroundColor: '#f9e8ec' },
+  danger: { backgroundColor: colors.dangerSurface },
   buttonLabel: { fontSize: 13, fontWeight: '800' },
   badge: { borderRadius: 7, paddingHorizontal: 8, paddingVertical: 5, alignSelf: 'flex-start' },
   badgeText: { fontSize: 11, fontWeight: '800' },
@@ -123,4 +133,4 @@ export const styles = StyleSheet.create({
   emptyIcon: { width: 45, height: 45, borderRadius: 14, backgroundColor: colors.softPlum, alignItems: 'center', justifyContent: 'center', marginBottom: 3 },
   emptyTitle: { color: colors.ink, fontSize: 17, fontWeight: '800', textAlign: 'center' },
   emptyDetail: { color: colors.muted, fontSize: 14, lineHeight: 20, textAlign: 'center', maxWidth: 340 },
-});
+}));
