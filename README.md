@@ -13,17 +13,13 @@ The first study session schedules a review for the next day. The intervals are 1
 
 ## Screenshots
 
-**Today in light mode**
+Mobile layout captured from the Expo web demo in a 390-pixel-wide phone viewport.
 
-![Today in light mode with the demo review queue](assets/screenshots/today-light.jpg)
+| Today | Library | Memory |
+| --- | --- | --- |
+| ![Light mode with the daily review queue](assets/screenshots/mobile-today.jpg) | ![Dark mode with custom subject gradients](assets/screenshots/mobile-library.jpg) | ![Forgetting curve with the final review selected](assets/screenshots/mobile-memory.jpg) |
 
-**Library in dark mode**
-
-![Library in dark mode with a custom blue subject gradient](assets/screenshots/library-dark.jpg)
-
-**Memory with a selected review**
-
-![Forgetting curve with a selected review date and the date range controls](assets/screenshots/memory-review.jpg)
+Desktop web preview screenshots are also available for [Today](assets/screenshots/today-light.jpg), [Library](assets/screenshots/library-dark.jpg), and [Memory](assets/screenshots/memory-review.jpg).
 
 ## Run locally
 
