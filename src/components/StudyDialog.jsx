@@ -3,20 +3,24 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button, Icon, SectionTitle } from './ui';
 import { useStudy } from '../study/StudyProvider';
+import { normalizeSubjectColor } from '../data/subjectColor';
+import { SubjectColorPicker } from './SubjectColorPicker';
 
 export function StudyDialog({ spec, onClose }) {
   const styles = useStyles();
   const colors = useColors();
   const [value, setValue] = useState(spec.field?.initial ?? '');
+  const [color, setColor] = useState(spec.subjectColor ?? '');
   const [error, setError] = useState(null);
   const { busy, mutate } = useStudy();
-  const disabled = busy || (spec.field !== undefined && !value.trim());
+  const normalizedColor = normalizeSubjectColor(color);
+  const disabled = busy || (spec.field !== undefined && !value.trim()) || (spec.subjectColor !== undefined && !normalizedColor);
 
   async function submit() {
     if (disabled) return;
     setError(null);
     try {
-      await mutate(() => spec.submit(value));
+      await mutate(() => spec.submit(value, normalizedColor));
       onClose();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Couldn’t save. Please try again.');
@@ -32,6 +36,7 @@ export function StudyDialog({ spec, onClose }) {
         maxLength={120} placeholder={spec.field.placeholder} placeholderTextColor={colors.muted}
         onSubmitEditing={() => void submit()} returnKeyType="done" style={styles.input} />
     </View>}
+    {spec.subjectColor !== undefined && <SubjectColorPicker value={color} onChange={setColor} disabled={busy} />}
     {error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
     <View style={styles.actions}>
       <Button label="Cancel" tone="secondary" disabled={busy} onPress={dismiss} />

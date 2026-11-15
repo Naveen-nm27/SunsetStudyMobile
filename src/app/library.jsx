@@ -20,9 +20,10 @@ export default function LibraryScreen() {
   const archived = subjects.filter((subject) => subject.archivedAt !== null);
 
   function editSubject(subject) {
-    setDialog({ title: subject ? 'Rename subject' : 'New subject', confirm: subject ? 'Save name' : 'Create subject',
+    setDialog({ title: subject ? 'Edit subject' : 'New subject', confirm: subject ? 'Save changes' : 'Create subject',
       field: { label: 'Subject name', initial: subject?.name, placeholder: 'e.g. Biology' },
-      submit: (name) => subject ? studyRepository.renameSubject(subject.id, name) : studyRepository.createSubject(name) });
+      subjectColor: subject?.color ?? defaultSubjectColor(subject?.id),
+      submit: (name, color) => subject ? studyRepository.updateSubject(subject.id, name, color) : studyRepository.createSubject(name, color) });
   }
 
   function editTopic(subject, topic) {
@@ -57,7 +58,7 @@ export default function LibraryScreen() {
       </View>)}
       {!subjectTopics.length && <Text style={styles.detail}>No topics yet.</Text>}
       <View style={styles.actions}>
-        <Button label="Rename" icon="edit" tone="secondary" disabled={busy} onPress={() => editSubject(subject)} />
+        <Button label="Edit subject" icon="edit" tone="secondary" disabled={busy} onPress={() => editSubject(subject)} />
         <Button label={isArchived ? 'Restore' : 'Archive'} icon="archive" tone="secondary" disabled={busy} onPress={() => changeArchive(subject)} />
       </View>
     </Card>;
