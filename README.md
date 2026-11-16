@@ -1,4 +1,8 @@
-# LocalStudyMobile
+# SunsetStudy - Mobile Version
+
+## The Forgetting Curve
+<img width="860" height="484" alt="image" src="https://github.com/user-attachments/assets/00891d02-d61f-4a1d-a170-785dd79be3dd" />
+
 
 LocalStudyMobile is an offline study planner for Android and iOS, with a web preview for local development. It uses Expo, React Native, JavaScript, and SQLite.
 
